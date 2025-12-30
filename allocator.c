@@ -24,18 +24,15 @@ typedef struct slab {
     struct slab* next;
 } slab_t;
 
-/* ---------- GLOBAL ---------- */
 static slab_t* global_slabs[NUM_CLASSES] = {0};
 static pthread_mutex_t global_lock = PTHREAD_MUTEX_INITIALIZER;
 
-/* ---------- THREAD LOCAL ---------- */
 typedef struct thread_cache {
     slab_t* slabs[NUM_CLASSES];
 } thread_cache_t;
 
 static __thread thread_cache_t cache = {0};
 
-/* ---------- UTIL ---------- */
 static int get_size_class(size_t size) {
     for (int i = 0; i < NUM_CLASSES; i++) {
         if (size <= size_classes[i])
@@ -73,13 +70,11 @@ static slab_t* slab_create(size_t block_size) {
     return slab;
 }
 
-/* ---------- ALLOC ---------- */
 void* my_malloc(size_t size) {
     if (size == 0) return NULL;
 
     int class = get_size_class(size);
 
-    /* Large alloc */
     if (class == -1) {
         size_t total = sizeof(size_t) + size;
         size_t* mem = mmap(NULL, total,
@@ -119,7 +114,6 @@ void* my_malloc(size_t size) {
     return (void*)(block + 1);
 }
 
-/* ---------- FREE ---------- */
 void my_free(void* ptr) {
     if (!ptr) return;
 
@@ -129,7 +123,6 @@ void my_free(void* ptr) {
 
     int class = get_size_class(size);
 
-    /* Large free */
     if (class == -1) {
         munmap(possible_size, sizeof(size_t) + size);
         return;
@@ -143,7 +136,6 @@ void my_free(void* ptr) {
         return;
     }
 
-    /* Fallback to global */
     pthread_mutex_lock(&global_lock);
     slab = global_slabs[class];
     block->next = slab->free_list;
