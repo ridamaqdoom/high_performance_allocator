@@ -17,8 +17,8 @@ Leveraging thread-local data
 
 The allocator replaces the standard malloc family with a custom implementation that can be transparently injected into applications.
 
-****Features**
-**
+**Features**
+
 Size-class based allocation (16B – 4KB)
 
 Slab allocator to batch allocations and reduce mmap calls
@@ -34,8 +34,9 @@ Transparent malloc interposition
 Implements malloc, free, calloc, and realloc
 
 
-****Allocation Strategy**
-****Size Classes**
+**Allocation Strategy**
+
+**Size Classes**
 
 Small allocations are mapped to fixed size classes:
 16, 32, 64, 128, 256, 512, 1024, 2048, 4096 bytes
@@ -45,8 +46,8 @@ Reduced fragmentation
 Predictable memory layout
 
 
-****Slab Allocation**
-**
+**Slab Allocation**
+
 A slab is a contiguous memory region (64KB) obtained via mmap, subdivided into fixed-size blocks.
 Benefits:
 One syscall provides many allocations
@@ -63,8 +64,8 @@ Objects of the same size share cache lines
 Improved locality and reuse
 Each slab maintains an internal free list of blocks.
 
-****Thread-Local Caching**
-**
+**Thread-Local Caching**
+
 To eliminate lock contention:
 
 Each thread maintains its own slab cache
@@ -74,11 +75,11 @@ Most allocations never acquire a mutex
 Global allocator is only used when refilling a cache
 
 
-****Malloc Interposition**
-**
+**Malloc Interposition**
+
 The allocator supports transparent replacement of the system allocator.
 
-Mechanism
+**Mechanism**
 
 Builds as a shared library
 
